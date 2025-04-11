@@ -83,6 +83,25 @@ if st.button("Analyze 🔍"):
                         f"{emoji} <b>{label.capitalize()}</b>: {score:.2%}</div>",
                         unsafe_allow_html=True
                     )
+                     # Pie Chart for emotion distribution
+    emotion_scores = {r['label']: r['score'] for r in results if r['score'] > 0.01}
+    labels = list(emotion_scores.keys())
+    sizes = list(emotion_scores.values())
+    colors = plt.cm.Pastel1(range(len(labels)))
+
+    fig, ax = plt.subplots()
+    wedges, texts, autotexts = ax.pie(
+        sizes,
+        labels=labels,
+        autopct='%1.1f%%',
+        colors=colors,
+        startangle=140,
+        textprops={'fontsize': 12}
+    )
+    ax.axis('equal')
+    st.markdown("### 📊 Emotion Distribution (Pie Chart)")
+    st.pyplot(fig)
+
                 with st.expander("ℹ️ About this app"):
                     st.write("Powered by `j-hartmann/emotion-english-distilroberta-base` with multi-label emotion detection and GIF-based reactions.")
 
