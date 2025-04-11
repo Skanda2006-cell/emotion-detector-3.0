@@ -1,7 +1,8 @@
 import streamlit as st
 from transformers import AutoTokenizer, AutoModelForSequenceClassification, pipeline
 import matplotlib.pyplot as plt
-import matplotlib.ticker as ticker
+import io
+import base64
 
 # Emojis, colors, and GIFs
 emotion_icons = {
@@ -29,6 +30,10 @@ st.set_page_config(page_title="Emotion Detector 3.0 😎", layout="wide")
 st.title("💬 Emotion Detector 3.0")
 st.markdown("Multi-label detection + Reaction GIFs 😄🎬")
 
+# Initialize mood diary
+if 'mood_diary' not in st.session_state:
+    st.session_state.mood_diary = []
+
 # Load model
 @st.cache_resource
 def load_model():
@@ -38,10 +43,6 @@ def load_model():
     return pipeline("text-classification", model=model, tokenizer=tokenizer, return_all_scores=True)
 
 classifier = load_model()
-
-# Initialize mood diary
-if "mood_diary" not in st.session_state:
-    st.session_state.mood_diary = []
 
 # Layout with columns: input + GIF
 col1, col2 = st.columns([2, 1])
@@ -69,8 +70,6 @@ if st.button("Analyze 🔍"):
                 st.warning("😕 No strong emotion detected. Try something more expressive.")
             else:
                 top_emotion = sorted_results[0]['label']
-                st.session_state.mood_diary.append({"sentence": text.strip(), "emotion": top_emotion})
-
                 top_gif = emotion_gifs.get(top_emotion)
                 if top_gif:
                     with col2:
@@ -78,6 +77,7 @@ if st.button("Analyze 🔍"):
 
                 st.markdown("---")
                 st.subheader("🎭 Detected Emotions")
+
                 for r in detected:
                     label = r['label']
                     score = r['score']
@@ -89,22 +89,36 @@ if st.button("Analyze 🔍"):
                         unsafe_allow_html=True
                     )
 
+                st.session_state.mood_diary.append((text.strip(), top_emotion))
+
         except Exception as e:
             st.error(f"🔥 Error: {e}")
 
-# Show Mood Diary
+# Mood Diary Section
 if st.session_state.mood_diary:
-    st.markdown("### 📘 Mood Diary")
-    st.dataframe(st.session_state.mood_diary[::-1])
+    st.markdown("---")
+    st.subheader("📔 Mood Diary")
+    for i, (entry, mood) in enumerate(st.session_state.mood_diary, 1):
+        st.write(f"{i}. {entry} --> {mood}")
 
-    # Combined pie chart
-    emotion_counter = {}
-    for entry in st.session_state.mood_diary:
-        emotion = entry["emotion"]
-        emotion_counter[emotion] = emotion_counter.get(emotion, 0) + 1
+    # Create TXT content
+    txt_content = "Mood Diary - Emotion Detector 3.0\n" + "-"*40 + "\n"
+    for i, (entry, mood) in enumerate(st.session_state.mood_diary, 1):
+        txt_content += f"{i}. {entry} --> {mood}\n"
 
-    labels = list(emotion_counter.keys())
-    sizes = list(emotion_counter.values())
+    # Encode to download
+    b64 = base64.b64encode(txt_content.encode()).decode()
+    href = f'<a href="data:file/txt;base64,{b64}" download="mood_diary.txt">📥 Download Mood Diary (TXT)</a>'
+    st.markdown(href, unsafe_allow_html=True)
+
+# Pie Chart of combined diary entries
+if st.session_state.mood_diary:
+    mood_count = {}
+    for _, mood in st.session_state.mood_diary:
+        mood_count[mood] = mood_count.get(mood, 0) + 1
+
+    labels = list(mood_count.keys())
+    sizes = list(mood_count.values())
     colors = plt.cm.Pastel1(range(len(labels)))
 
     fig, ax = plt.subplots(figsize=(4, 4))
@@ -117,8 +131,8 @@ if st.session_state.mood_diary:
         textprops={'fontsize': 12}
     )
     ax.axis('equal')
-    st.markdown("### 📊 Emotion Distribution from Mood Diary")
+    st.markdown("### 📊 Emotion Distribution (Pie Chart from Mood Diary)")
     st.pyplot(fig)
 
-with st.expander("ℹ️ About this app"):
-    st.write("Powered by `j-hartmann/emotion-english-distilroberta-base` with multi-label emotion detection and GIF-based reactions. Includes mood diary and cumulative emotion analytics.")
+    with st.expander("ℹ️ About this app"):
+        st.write("Powered by `j-hartmann/emotion-english-distilroberta-base` with multi-label emotion detection and GIF-based reactions.")
