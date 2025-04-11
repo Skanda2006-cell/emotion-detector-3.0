@@ -29,10 +29,6 @@ st.set_page_config(page_title="Emotion Detector 3.0 😎", layout="wide")
 st.title("💬 Emotion Detector 3.0")
 st.markdown("Multi-label detection + Reaction GIFs 😄🎬")
 
-# Initialize session state for mood diary
-if "mood_diary" not in st.session_state:
-    st.session_state.mood_diary = []
-
 # Load model
 @st.cache_resource
 def load_model():
@@ -42,6 +38,10 @@ def load_model():
     return pipeline("text-classification", model=model, tokenizer=tokenizer, return_all_scores=True)
 
 classifier = load_model()
+
+# Initialize mood diary
+if "mood_diary" not in st.session_state:
+    st.session_state.mood_diary = []
 
 # Layout with columns: input + GIF
 col1, col2 = st.columns([2, 1])
@@ -69,17 +69,15 @@ if st.button("Analyze 🔍"):
                 st.warning("😕 No strong emotion detected. Try something more expressive.")
             else:
                 top_emotion = sorted_results[0]['label']
+                st.session_state.mood_diary.append({"sentence": text.strip(), "emotion": top_emotion})
+
                 top_gif = emotion_gifs.get(top_emotion)
                 if top_gif:
                     with col2:
                         gif_placeholder.image(top_gif, use_container_width=True)
 
-                # Add to mood diary
-                st.session_state.mood_diary.append({"sentence": text.strip(), "emotion": top_emotion})
-
                 st.markdown("---")
                 st.subheader("🎭 Detected Emotions")
-
                 for r in detected:
                     label = r['label']
                     score = r['score']
@@ -91,33 +89,36 @@ if st.button("Analyze 🔍"):
                         unsafe_allow_html=True
                     )
 
-                # Pie Chart for emotion distribution
-                emotion_scores = {r['label']: r['score'] for r in results if r['score'] > 0.01}
-                labels = list(emotion_scores.keys())
-                sizes = list(emotion_scores.values())
-                colors = plt.cm.Pastel1(range(len(labels)))
-
-                fig, ax = plt.subplots(figsize=(4, 4))
-                wedges, texts, autotexts = ax.pie(
-                    sizes,
-                    labels=labels,
-                    autopct='%1.1f%%',
-                    colors=colors,
-                    startangle=140,
-                    textprops={'fontsize': 12}
-                )
-                ax.axis('equal')
-                st.markdown("### 📊 Emotion Distribution (Pie Chart)")
-                st.pyplot(fig)
-
-                with st.expander("📘 Mood Diary"):
-                    if st.session_state.mood_diary:
-                        st.dataframe(st.session_state.mood_diary[::-1], use_container_width=True)
-                    else:
-                        st.write("No entries yet.")
-
-                with st.expander("ℹ️ About this app"):
-                    st.write("Powered by `j-hartmann/emotion-english-distilroberta-base` with multi-label emotion detection and GIF-based reactions.")
-
         except Exception as e:
             st.error(f"🔥 Error: {e}")
+
+# Show Mood Diary
+if st.session_state.mood_diary:
+    st.markdown("### 📘 Mood Diary")
+    st.dataframe(st.session_state.mood_diary[::-1])
+
+    # Combined pie chart
+    emotion_counter = {}
+    for entry in st.session_state.mood_diary:
+        emotion = entry["emotion"]
+        emotion_counter[emotion] = emotion_counter.get(emotion, 0) + 1
+
+    labels = list(emotion_counter.keys())
+    sizes = list(emotion_counter.values())
+    colors = plt.cm.Pastel1(range(len(labels)))
+
+    fig, ax = plt.subplots(figsize=(4, 4))
+    wedges, texts, autotexts = ax.pie(
+        sizes,
+        labels=labels,
+        autopct='%1.1f%%',
+        colors=colors,
+        startangle=140,
+        textprops={'fontsize': 12}
+    )
+    ax.axis('equal')
+    st.markdown("### 📊 Emotion Distribution from Mood Diary")
+    st.pyplot(fig)
+
+with st.expander("ℹ️ About this app"):
+    st.write("Powered by `j-hartmann/emotion-english-distilroberta-base` with multi-label emotion detection and GIF-based reactions. Includes mood diary and cumulative emotion analytics.")
