@@ -2,6 +2,7 @@ import streamlit as st
 from transformers import AutoTokenizer, AutoModelForSequenceClassification, pipeline
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
+import pandas as pd
 
 # Emojis, colors, and GIFs
 emotion_icons = {
@@ -24,9 +25,18 @@ emotion_gifs = {
     "disgust": "https://media.giphy.com/media/3o6Zt481isNVuQI1l6/giphy.gif"
 }
 
+# Initialize session state
+if 'mood_diary' not in st.session_state:
+    st.session_state.mood_diary = []
+
 # Page setup
 st.set_page_config(page_title="Emotion Detector 3.0 😎", layout="wide")
-st.title("💬 Emotion Detector 3.0")
+st.markdown("""
+<div style="display: flex; align-items: center;">
+    <h1 style="margin-right: 10px;">💬 Emotion Detector 3.0</h1>
+    <img src="https://media.giphy.com/media/l0HlOvJ7yaacpuSas/giphy.gif" width="60" style="margin-top: 10px;" />
+</div>
+""", unsafe_allow_html=True)
 st.markdown("Multi-label detection + Reaction GIFs 😄🎬")
 
 # Load model
@@ -47,7 +57,7 @@ with col1:
 
 with col2:
     st.markdown("### 🎬 Reaction Preview")
-    gif_placeholder = st.empty()  # We'll load the GIF later if text is valid
+    gif_placeholder = st.empty()
 
 # Analyze button
 if st.button("Analyze 🔍"):
@@ -57,7 +67,6 @@ if st.button("Analyze 🔍"):
         try:
             results = classifier(text.strip())[0]
             sorted_results = sorted(results, key=lambda x: x['score'], reverse=True)
-
             threshold = 0.1
             detected = [r for r in sorted_results if r['score'] >= threshold]
 
@@ -68,7 +77,7 @@ if st.button("Analyze 🔍"):
                 top_gif = emotion_gifs.get(top_emotion)
                 if top_gif:
                     with col2:
-                        gif_placeholder.image(top_gif, use_column_width=True)
+                        gif_placeholder.image(top_gif, use_container_width=True)
 
                 st.markdown("---")
                 st.subheader("🎭 Detected Emotions")
@@ -83,26 +92,30 @@ if st.button("Analyze 🔍"):
                         f"{emoji} <b>{label.capitalize()}</b>: {score:.2%}</div>",
                         unsafe_allow_html=True
                     )
-   # Pie Chart for emotion distribution
-            emotion_scores = {r['label']: r['score'] for r in results if r['score'] > 0.01}
-            labels = list(emotion_scores.keys())
-            sizes = list(emotion_scores.values())
-            colors = plt.cm.Pastel1(range(len(labels)))
 
-            fig, ax = plt.subplots(figsize=(4, 4))  # Adjusted size here
-            wedges, texts, autotexts = ax.pie(
-                sizes,
-                labels=labels,
-                autopct='%1.1f%%',
-                colors=colors,
-                startangle=140,
-                textprops={'fontsize': 12}
-            )
-            ax.axis('equal')
-            st.markdown("### 📊 Emotion Distribution (Pie Chart)")
-            st.pyplot(fig)
-            with st.expander("ℹ️ About this app"):
-                st.write("Powered by `j-hartmann/emotion-english-distilroberta-base` with multi-label emotion detection and GIF-based reactions.")
+                # Record to mood diary
+                st.session_state.mood_diary.append({
+                    "text": text.strip(),
+                    "emotion": top_emotion,
+                    "score": sorted_results[0]['score']
+                })
 
-        except Exception as e:
-            st.error(f"🔥 Error: {e}")
+# Combined Pie Chart of Mood Diary
+if st.session_state.mood_diary:
+    st.markdown("### 📓 Mood Diary Overview")
+    df = pd.DataFrame(st.session_state.mood_diary)
+    pie_data = df['emotion'].value_counts()
+
+    fig, ax = plt.subplots(figsize=(4, 4))
+    ax.pie(pie_data, labels=pie_data.index, autopct='%1.1f%%', colors=plt.cm.Pastel2(range(len(pie_data))), startangle=140)
+    ax.axis('equal')
+    st.pyplot(fig)
+
+    with st.expander("📜 Mood Diary Entries"):
+        st.dataframe(df[::-1], use_container_width=True)
+
+    with st.expander("ℹ️ About this app"):
+        st.write("Powered by `j-hartmann/emotion-english-distilroberta-base` with multi-label emotion detection and GIF-based reactions.")
+
+except Exception as e:
+    st.error(f"🔥 Error: {e}")
