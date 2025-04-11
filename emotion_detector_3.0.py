@@ -83,24 +83,6 @@ if st.button("Analyze 🔍"):
                         f"{emoji} <b>{label.capitalize()}</b>: {score:.2%}</div>",
                         unsafe_allow_html=True
                     )
-
-                st.markdown("---")
-                st.subheader("📊 Mood Diary")
-
-                labels = [r['label'].capitalize() for r in sorted_results]
-                scores = [r['score'] for r in sorted_results]
-                colors = [emotion_colors.get(r['label'], "#ccc") for r in sorted_results]
-
-                plt.clf()
-                fig, ax = plt.subplots()
-                ax.barh(labels[::-1], scores[::-1], color=colors[::-1])
-                ax.set_xlim(0, 1)
-                ax.xaxis.set_major_locator(ticker.MultipleLocator(0.1))
-                ax.set_xticklabels(['{:.0%}'.format(x) for x in ax.get_xticks()])
-                ax.set_xlabel("Confidence Score")
-                ax.set_title("All Emotion Scores")
-                st.pyplot(fig)
-
                 with st.expander("ℹ️ About this app"):
                     st.write("Powered by `j-hartmann/emotion-english-distilroberta-base` with multi-label emotion detection and GIF-based reactions.")
 
