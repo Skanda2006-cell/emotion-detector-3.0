@@ -19,7 +19,7 @@ emotion_gifs = {
     "sadness": "https://media.giphy.com/media/d2lcHJTG5Tscg/giphy.gif",
     "anger": "https://media.giphy.com/media/l3V0j3ytFyGHqiV7W/giphy.gif",
     "fear": "https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExMmsyOGRqMm1lcXg3Zjd5bW9uc3hzbno0YmJodDR3MGszdHRwbTZ0dCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/DHw6uxU2WbJ3a/giphy.gif",
-    "surprise": "https://tenor.com/en-GB/view/ishowspeed-speed-shocked-shock-shocked-meme-gif-8910406893424234862",
+    "surprise": "hhttps://tenor.com/en-GB/view/nitch-gif-11388006018378072674",
     "love": "https://media.giphy.com/media/l0HlOvJ7yaacpuSas/giphy.gif",
     "neutral": "https://media.giphy.com/media/xT9IgIc0lryrxvqVGM/giphy.gif",
     "disgust": "https://media.giphy.com/media/3o6Zt481isNVuQI1l6/giphy.gif"
