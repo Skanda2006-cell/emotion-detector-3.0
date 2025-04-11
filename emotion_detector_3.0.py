@@ -101,8 +101,8 @@ if st.button("Analyze 🔍"):
             ax.axis('equal')
             st.markdown("### 📊 Emotion Distribution (Pie Chart)")
             st.pyplot(fig)
-                with st.expander("ℹ️ About this app"):
-                    st.write("Powered by `j-hartmann/emotion-english-distilroberta-base` with multi-label emotion detection and GIF-based reactions.")
+            with st.expander("ℹ️ About this app"):
+                st.write("Powered by `j-hartmann/emotion-english-distilroberta-base` with multi-label emotion detection and GIF-based reactions.")
 
         except Exception as e:
             st.error(f"🔥 Error: {e}")
