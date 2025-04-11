@@ -16,7 +16,7 @@ emotion_colors = {
 emotion_gifs = {
     "joy": "https://media.giphy.com/media/yoJC2Olx0ekMy2nX7W/giphy.gif",
     "sadness": "https://media.giphy.com/media/d2lcHJTG5Tscg/giphy.gif",
-    "anger": "https://media.giphy.com/media/3o7aD2saalBwwftBIY/giphy.gif",
+    "anger": "https://media.giphy.com/media/l3V0j3ytFyGHqiV7W/giphy.gif",
     "fear": "https://media.giphy.com/media/3o6ZtaO9BZHcOjmErm/giphy.gif",
     "surprise": "https://media.giphy.com/media/l0MYt5jPR6QX5pnqM/giphy.gif",
     "love": "https://media.giphy.com/media/l0HlOvJ7yaacpuSas/giphy.gif",
