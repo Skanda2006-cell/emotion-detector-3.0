@@ -1,7 +1,6 @@
 import streamlit as st
 from transformers import AutoTokenizer, AutoModelForSequenceClassification, pipeline
 import matplotlib.pyplot as plt
-import io
 import base64
 
 # Emojis, colors, and GIFs
@@ -15,19 +14,19 @@ emotion_colors = {
     "neutral": "#cfd8dc", "disgust": "#dcedc8"
 }
 emotion_gifs = {
-    "joy": "https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExanRoYjdlZmpwaDQ5azkxbWg1ZzJhY2NrcWt2dXZyNHBzeTNzaTZ0diZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/5tkQ2D8oxYBVKwWNMV/giphy.gif",
-    "sadness": "https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExMjVrZ21vbTZsaTh5amNrdTlieGUzMWR2NHIyZnNxc2xnOGJsOTgwNyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/mpy4YrE8nw6K3FCfz0/giphy.gif",
-    "anger": "https://media.giphy.com/media/l3V0j3ytFyGHqiV7W/giphy.gif",
-    "fear": "https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExMmsyOGRqMm1lcXg3Zjd5bW9uc3hzbno0YmJodDR3MGszdHRwbTZ0dCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/DHw6uxU2WbJ3a/giphy.gif",
-    "surprise": "https://tenor.com/en-GB/view/nitch-gif-11388006018378072674",
+    "joy": "https://media3.giphy.com/media/5tkQ2D8oxYBVKwWNMV/giphy.gif",
+    "sadness": "https://media1.giphy.com/media/mpy4YrE8nw6K3FCfz0/giphy.gif",
+    "anger": "https://media2.giphy.com/media/69Egkd3vBh3AXuA5SC/giphy.gif",
+    "fear": "https://media3.giphy.com/media/DHw6uxU2WbJ3a/giphy.gif",
+    "surprise": "https://media1.giphy.com/media/E9bnFb6MvQgdTTS0CF/giphy.gif",
     "love": "https://media.giphy.com/media/l0HlOvJ7yaacpuSas/giphy.gif",
     "neutral": "https://media.giphy.com/media/xT9IgIc0lryrxvqVGM/giphy.gif",
     "disgust": "https://media.giphy.com/media/3o6Zt481isNVuQI1l6/giphy.gif"
 }
 
 # Page setup
-st.set_page_config(page_title="Emotion Detector 3.0 😎", layout="wide")
-st.title("💬 Emotion Detector 3.0")
+st.set_page_config(page_title="Emotion Detector:text based 😎", layout="wide")
+st.title("💬 Emotion Detector: Text based")
 st.markdown("Multi-label detection + Reaction GIFs 😄🎬")
 
 # Initialize mood diary
@@ -63,33 +62,42 @@ if st.button("Analyze 🔍"):
             results = classifier(text.strip())[0]
             sorted_results = sorted(results, key=lambda x: x['score'], reverse=True)
 
-            threshold = 0.1
-            detected = [r for r in sorted_results if r['score'] >= threshold]
+            top_emotion = sorted_results[0]['label']
+            top_score = sorted_results[0]['score']
 
-            if not detected:
-                st.warning("😕 No strong emotion detected. Try something more expressive.")
-            else:
-                top_emotion = sorted_results[0]['label']
-                top_gif = emotion_gifs.get(top_emotion)
-                if top_gif:
-                    with col2:
-                        gif_placeholder.image(top_gif, use_container_width=True)
+            # Show GIF
+            top_gif = emotion_gifs.get(top_emotion)
+            if top_gif:
+                with col2:
+                    gif_placeholder.image(top_gif, use_container_width=True)
 
-                st.markdown("---")
-                st.subheader("🎭 Detected Emotions")
+            # --- Unified Vibe & Detection Display ---
+            st.markdown("---")
+            st.markdown("## 🎯 Emotion Meter + Top Emotions")
 
-                for r in detected:
-                    label = r['label']
-                    score = r['score']
-                    emoji = emotion_icons.get(label, "")
-                    color = emotion_colors.get(label, "#eee")
-                    st.markdown(
-                        f"<div style='background-color:{color}; padding:10px; border-radius:10px; font-size:18px;'>"
-                        f"{emoji} <b>{label.capitalize()}</b>: {score:.2%}</div>",
-                        unsafe_allow_html=True
-                    )
+            # Top 1 Emotion - Bar and Confidence
+            vibe_emoji = emotion_icons.get(top_emotion, "❓")
+            vibe_color = emotion_colors.get(top_emotion, "#eee")
+            st.markdown(f"<div style='background-color:{vibe_color}; padding:10px; border-radius:10px;'>"
+                        f"<h3>{vibe_emoji} {top_emotion.capitalize()}</h3>"
+                        f"<p style='font-size:18px;'>Confidence: {top_score:.2%}</p></div>",
+                        unsafe_allow_html=True)
+            st.progress(int(top_score * 100))
 
-                st.session_state.mood_diary.append((text.strip(), top_emotion))
+            # Top 3 Emotions
+            st.markdown("### 🎭 Top 3 Detected Emotions")
+            for r in sorted_results[:3]:
+                label = r['label']
+                score = r['score']
+                emoji = emotion_icons.get(label, "")
+                color = emotion_colors.get(label, "#eee")
+                st.markdown(
+                    f"<div style='background-color:{color}; padding:10px; border-radius:10px; font-size:18px;'>"
+                    f"{emoji} <b>{label.capitalize()}</b>: {score:.2%}</div>",
+                    unsafe_allow_html=True
+                )
+
+            st.session_state.mood_diary.append((text.strip(), top_emotion))
 
         except Exception as e:
             st.error(f"🔥 Error: {e}")
@@ -101,17 +109,16 @@ if st.session_state.mood_diary:
     for i, (entry, mood) in enumerate(st.session_state.mood_diary, 1):
         st.write(f"{i}. {entry} --> {mood}")
 
-    # Create TXT content
-    txt_content = "Mood Diary - Emotion Detector 3.0\n" + "-"*40 + "\n"
+    # Download link
+    txt_content = "Mood Diary - Emotion Detector\n" + "-"*40 + "\n"
     for i, (entry, mood) in enumerate(st.session_state.mood_diary, 1):
         txt_content += f"{i}. {entry} --> {mood}\n"
 
-    # Encode to download
     b64 = base64.b64encode(txt_content.encode()).decode()
     href = f'<a href="data:file/txt;base64,{b64}" download="mood_diary.txt">📥 Download Mood Diary (TXT)</a>'
     st.markdown(href, unsafe_allow_html=True)
 
-# Pie Chart of combined diary entries
+# Pie Chart from Diary
 if st.session_state.mood_diary:
     mood_count = {}
     for _, mood in st.session_state.mood_diary:
@@ -122,7 +129,7 @@ if st.session_state.mood_diary:
     colors = plt.cm.Pastel1(range(len(labels)))
 
     fig, ax = plt.subplots(figsize=(4, 4))
-    wedges, texts, autotexts = ax.pie(
+    ax.pie(
         sizes,
         labels=labels,
         autopct='%1.1f%%',
