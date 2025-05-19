@@ -15,7 +15,7 @@ emotion_colors = {
     "neutral": "#cfd8dc", "disgust": "#dcedc8"
 }
 emotion_gifs = {
-    "joy": "https://media.giphy.com/media/5GoVLqeAOo6PK/giphy.gif",
+    "joy": "https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExanRoYjdlZmpwaDQ5azkxbWg1ZzJhY2NrcWt2dXZyNHBzeTNzaTZ0diZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/5tkQ2D8oxYBVKwWNMV/giphy.gif",
     "sadness": "https://media.giphy.com/media/d2lcHJTG5Tscg/giphy.gif",
     "anger": "https://media.giphy.com/media/l3V0j3ytFyGHqiV7W/giphy.gif",
     "fear": "https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExMmsyOGRqMm1lcXg3Zjd5bW9uc3hzbno0YmJodDR3MGszdHRwbTZ0dCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/DHw6uxU2WbJ3a/giphy.gif",
